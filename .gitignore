@@ -1,0 +1,79 @@
+# ─── Node ────────────────────────────────────────────────────────────────────
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+
+# ─── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# ─── Entornos virtuales ──────────────────────────────────────────────────────
+.venv/
+venv/
+ENV/
+env/
+
+# ─── Variables de entorno reales (NUNCA se commitean) ────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ─── Volcados y respaldos de base de datos ───────────────────────────────────
+*.sql
+*.dump
+*.backup
+backups/
+database_backups/
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── Sistema operativo ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Editores ────────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Artefactos de pruebas y temporales ──────────────────────────────────────
+tmp/
+temp/
+*.tmp
+.cache/

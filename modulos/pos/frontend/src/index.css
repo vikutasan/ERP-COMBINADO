@@ -1,0 +1,123 @@
+/* Estilos globales del POS nuevo — P2.1 / P2.6 / Fase 0.
+ *
+ * La paleta canónica se aplica aquí como variables CSS para que el fondo
+ * profundo y el acento viajen intactos en los 3 modos (R-03). Tailwind aporta
+ * las utilidades; estas variables son la base del documento.
+ *
+ * FASE 0 (28 Sep 2026): las variables ahora se declaran como CANALES RGB
+ * separados por espacio (ej: `193 215 46` en vez de `#c1d72e`). Esto es
+ * necesario porque Tailwind usa el patrón `rgb(var(--x) / <alpha-value>)`
+ * para que funcionen las opacidades (`bg-acento/40`, `text-crema-ticket/50`).
+ *
+ * Para cambiar el tema en runtime, basta con reescribir estos 6 valores
+ * en :root (o en el contenedor del módulo) con `element.style.setProperty()`.
+ *
+ * Tabla de conversión (referencia):
+ *   #c1d72e → 193 215 46   (acento / verde lima)
+ *   #0a0a0a → 10 10 10     (fondo profundo / casi negro)
+ *   #080808 → 8 8 8        (fondo profundo alt / negro)
+ *   #1a1a1a → 26 26 26     (fondo panel / gris oscuro)
+ *   #fdfbf7 → 253 251 247  (crema ticket / blanco cálido)
+ *   #ef4444 → 239 68 68    (peligro / rojo)
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Paleta canónica (PALETA_CANONICA) — Fase 0: canales RGB, no hex.
+   * Cada valor son los 3 canales separados por espacio (R G B).
+   * Tailwind los interpreta como rgb(R G B / alpha). */
+  --acento: 193 215 46;
+  --fondo-profundo: 10 10 10;
+  --fondo-profundo-alt: 8 8 8;
+  --fondo-panel: 26 26 26;
+  --crema-ticket: 253 251 247;
+  --peligro: 239 68 68;
+
+  /* Tokens extendidos — mundo madera (secciones Grandeza/pizarrón). */
+  --madera: 222 180 124;
+  --madera-panel: 45 30 19;
+  --madera-veta: 196 154 92;
+
+  /* FD-02: token naranja del encabezado Grandeza (antes #ea580c hardcodeado).
+   * Se usa en TerminalSelector (subtítulo, botón de manager) y en cualquier
+   * componente del mundo madera que necesite el acento cálido.
+   * #FF8C00 (naranja oscuro Tailwind) y #ea580c son ambos variantes del mismo
+   * acento cálido; se unifican aquí. */
+  --acento-calido: 234 88 12;
+
+  /* Tokens del mundo madera oscura (pizarrón / header Grandeza).
+   * Antes dispersos como bg-[#3d2b1f], bg-[#2d1e13], text-[#4a3221]. */
+  --madera-oscura:       61 43 31;    /* #3d2b1f — marco del tablero */
+  --madera-oscura-panel: 45 30 19;    /* #2d1e13 — encabezado header */
+  --madera-oscura-text:  74 50 33;    /* #4a3221 — texto sobre corcho */
+  --corcho:              188 138 95;  /* #bc8a5f — textura del tablero */
+
+  /* Tokens de estado de red de terminal (antes hex sueltos en terminalCardState.js). */
+  --estado-disponible:   85 85 85;    /* #555    — gris neutro */
+  --estado-en-linea:     74 222 128;  /* #4ade80 — verde brillante */
+  --estado-inactiva:     245 158 11;  /* #f59e0b — ámbar */
+  --estado-expirada:     239 68 68;   /* #ef4444 — rojo (= --peligro) */
+
+  /* Tokens de feedback/toasts (antes hex sueltos en TerminalSelector.jsx). */
+  --feedback-exito:      22 163 74;   /* #16a34a — verde */
+  --feedback-error:      220 38 38;   /* #dc2626 — rojo */
+  --feedback-neutro:     39 39 42;    /* #27272a — zinc oscuro */
+  --feedback-error-bg:   153 27 27;   /* #991b1b — rojo oscuro */
+  --feedback-error-text: 252 165 165; /* #fca5a5 — rojo claro */
+
+  /* Tokens de scrollbar (antes #9ca3af / #cbd5e1 hardcodeados). */
+  --scrollbar-thumb:     156 163 175; /* #9ca3af — gris claro */
+  --scrollbar-thumb-hover: 203 213 225; /* #cbd5e1 — gris más claro */
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: rgb(var(--madera));
+  color: rgb(var(--crema-ticket));
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  /* R-02: la tipografía escala con el viewport, no se fija en px. */
+  font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.125rem);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* R-04: todo control interactivo respeta el target táctil de 44×44px. */
+button,
+[role='button'] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Scrollbar discreta, coherente con el fondo profundo.
+ * FIX-BUG17 (feedback #4): el pulgar era casi negro (#2a2a2a) y al pasar el
+ * cursor saltaba al acento lima (--acento), un cambio muy "chillón". Se usa un
+ * gris claro sobrio en reposo y un gris un poco más claro al pasar el cursor,
+ * sin tocar el acento. Los grises son decorativos (no tokens canónicos). */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(var(--fondo-profundo-alt));
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--scrollbar-thumb));
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--scrollbar-thumb-hover));
+}
+/* Firefox: propiedades estándar para que el color no lo decida el sistema. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--scrollbar-thumb)) rgb(var(--fondo-profundo-alt));
+}
+

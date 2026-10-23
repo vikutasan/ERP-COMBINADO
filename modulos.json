@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "descripcion": "Registro de los 17 modulos del ERP COMBINADO. El shell del hub lee este archivo y renderiza un enlace por modulo. El shell NO importa codigo de ningun modulo: solo guarda URLs.",
+  "rangos": {
+    "frontends": "5200-5241 (pares)",
+    "apis": "5200-5241 (impares)",
+    "postgresql": "5440-5456"
+  },
+  "modulos": [
+    {
+      "id": "vista-general",
+      "nombre": "Vista General",
+      "orden": 1,
+      "frontend": "http://localhost:5200",
+      "api": "http://localhost:5201",
+      "health": "http://localhost:5201/health",
+      "db": "erp_vista_general",
+      "estado": "pendiente",
+      "fase": 5,
+      "contratos_provee": [],
+      "contratos_consume": [],
+      "notas": "Propietario de la identidad corporativa (RT-13) y de system_settings (DT-06)."
+    },
+    {
+      "id": "pos",
+      "nombre": "Punto de Venta IA",
+      "orden": 2,
+      "frontend": "http://localhost:5210",
+      "api": "http://localhost:5211",
+      "health": "http://localhost:5211/health",
+      "db": "erp_pos",
+      "estado": "operativo",
+      "fase": 1,
+      "contratos_provee": [
+        "pos.eventos_auditables",
+        "pos.resumen_de_venta"
+      ],
+      "contratos_consume": [
+        "catalogo.productos_para_venta",
+        "seguridad.identidad_del_empleado",
+        "seguridad.validar_pin",
+        "almacenes.consumir_por_venta",
+        "almacenes.disponibilidad",
+        "produccion.disponible_para_vender",
+        "vision.reconocer_producto",
+        "ia.transcribir_voz",
+        "ia.interpretar_intencion",
+        "clientes.beneficios_para_ticket",
+        "notificaciones.encolar_ticket"
+      ],
+      "notas": "Modulo de la FASE 1. Corre con su propia API y su propia BD. Caja vive dentro del POS."
+    },
+    {
+      "id": "gestion-productos",
+      "nombre": "Gestión de Productos",
+      "orden": 3,
+      "frontend": "http://localhost:5212",
+      "api": "http://localhost:5213",
+      "health": "http://localhost:5213/health",
+      "db": "erp_catalogo",
+      "estado": "pendiente",
+      "fase": 3,
+      "contratos_provee": [
+        "catalogo.productos_para_venta"
+      ],
+      "contratos_consume": [],
+      "notas": "Unico dueno del catalogo (CONTRATO_PRODUCTO_TRANSVERSAL). Solo este modulo escribe productos."
+    },
+    {
+      "id": "gestion-almacenes",
+      "nombre": "Gestión de Almacenes",
+      "orden": 4,
+      "frontend": "http://localhost:5214",
+      "api": "http://localhost:5215",
+      "health": "http://localhost:5215/health",
+      "db": "erp_almacenes",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [
+        "almacenes.consumir_por_venta",
+        "almacenes.disponibilidad"
+      ],
+      "contratos_consume": [],
+      "notas": "Esquema completo, pero el inventario NO es operativo: el POS no valida stock al vender (D9)."
+    },
+    {
+      "id": "centro-ia",
+      "nombre": "Centro de IA",
+      "orden": 5,
+      "frontend": "http://localhost:5216",
+      "api": "http://localhost:5217",
+      "health": "http://localhost:5217/health",
+      "db": "erp_ia",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [
+        "vision.reconocer_producto",
+        "ia.transcribir_voz",
+        "ia.interpretar_intencion"
+      ],
+      "contratos_consume": [],
+      "notas": "DT-07: un fallo del Centro de IA NUNCA bloquea una venta."
+    },
+    {
+      "id": "gestion-produccion",
+      "nombre": "Gestión de la Producción",
+      "orden": 6,
+      "frontend": "http://localhost:5218",
+      "api": "http://localhost:5219",
+      "health": "http://localhost:5219/health",
+      "db": "erp_produccion",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [
+        "produccion.disponible_para_vender"
+      ],
+      "contratos_consume": [],
+      "notas": ""
+    },
+    {
+      "id": "gestion-pickup",
+      "nombre": "Gestión de Pickup",
+      "orden": 7,
+      "frontend": "http://localhost:5220",
+      "api": "http://localhost:5221",
+      "health": "http://localhost:5221/health",
+      "db": "erp_pickup",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [
+        "pedidos.crear",
+        "pedidos.actualizar_estado"
+      ],
+      "contratos_consume": [],
+      "notas": ""
+    },
+    {
+      "id": "gestion-repartos",
+      "nombre": "Gestión de Repartos",
+      "orden": 8,
+      "frontend": "http://localhost:5222",
+      "api": "http://localhost:5223",
+      "health": "http://localhost:5223/health",
+      "db": "erp_repartos",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [
+        "pedidos.crear",
+        "pedidos.actualizar_estado"
+      ],
+      "contratos_consume": [],
+      "notas": ""
+    },
+    {
+      "id": "estadisticas",
+      "nombre": "Estadísticas",
+      "orden": 9,
+      "frontend": "http://localhost:5224",
+      "api": "http://localhost:5225",
+      "health": "http://localhost:5225/health",
+      "db": "erp_estadisticas",
+      "estado": "pendiente",
+      "fase": 3,
+      "contratos_provee": [],
+      "contratos_consume": [
+        "pos.resumen_de_venta"
+      ],
+      "notas": "Nunca lee erp_pos.tickets directamente: consume el contrato 6 por HTTP."
+    },
+    {
+      "id": "gestion-compras",
+      "nombre": "Gestión de Compras",
+      "orden": 10,
+      "frontend": "http://localhost:5226",
+      "api": "http://localhost:5227",
+      "health": "http://localhost:5227/health",
+      "db": "erp_compras",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [],
+      "contratos_consume": [
+        "almacenes.consumir_por_venta"
+      ],
+      "notas": "Escribe en el ledger de almacenes por contrato, nunca directo a la tabla."
+    },
+    {
+      "id": "seguridad",
+      "nombre": "Seguridad y Acceso",
+      "orden": 11,
+      "frontend": "http://localhost:5228",
+      "api": "http://localhost:5229",
+      "health": "http://localhost:5229/health",
+      "db": "erp_seguridad",
+      "estado": "pendiente",
+      "fase": 3,
+      "contratos_provee": [
+        "seguridad.identidad_del_empleado",
+        "seguridad.validar_pin"
+      ],
+      "contratos_consume": [],
+      "notas": "Critico: sin este modulo el POS no tiene usuarios reales."
+    },
+    {
+      "id": "recursos-humanos",
+      "nombre": "Recursos Humanos",
+      "orden": 12,
+      "frontend": "http://localhost:5230",
+      "api": "http://localhost:5231",
+      "health": "http://localhost:5231/health",
+      "db": "erp_rrhh",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [],
+      "contratos_consume": [
+        "seguridad.identidad_del_empleado"
+      ],
+      "notas": "Consume la identidad desde Seguridad por contrato."
+    },
+    {
+      "id": "auditoria",
+      "nombre": "Auditoría y Control",
+      "orden": 13,
+      "frontend": "http://localhost:5232",
+      "api": "http://localhost:5233",
+      "health": "http://localhost:5233/health",
+      "db": "erp_auditoria",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [],
+      "contratos_consume": [
+        "pos.eventos_auditables"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "ajustes",
+      "nombre": "Ajustes del Sistema",
+      "orden": 14,
+      "frontend": "http://localhost:5234",
+      "api": "http://localhost:5235",
+      "health": "http://localhost:5235/health",
+      "db": "erp_ajustes",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [],
+      "contratos_consume": [],
+      "notas": "DT-06: Vista General declara, Ajustes almacena. system_settings tiene un solo dueno."
+    },
+    {
+      "id": "monitoreo-red",
+      "nombre": "Monitoreo de Red",
+      "orden": 15,
+      "frontend": "http://localhost:5236",
+      "api": "http://localhost:5237",
+      "health": "http://localhost:5237/health",
+      "db": "erp_red",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [],
+      "contratos_consume": [],
+      "notas": "Sin dependencias de los 7 modulos eliminados."
+    },
+    {
+      "id": "reparto-grandeza",
+      "nombre": "Reparto Pan Grandeza",
+      "orden": 16,
+      "frontend": "http://localhost:5238",
+      "api": "http://localhost:5239",
+      "health": "http://localhost:5239/health",
+      "db": "erp_grandeza",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [],
+      "contratos_consume": [],
+      "notas": "Adaptado al esquema nuevo."
+    },
+    {
+      "id": "heladeria",
+      "nombre": "Heladería",
+      "orden": 17,
+      "frontend": "http://localhost:5240",
+      "api": "http://localhost:5241",
+      "health": "http://localhost:5241/health",
+      "db": "erp_heladeria",
+      "estado": "pendiente",
+      "fase": 4,
+      "contratos_provee": [],
+      "contratos_consume": [],
+      "notas": "Usa pos_target HELADERIA y heladeria_enabled."
+    }
+  ],
+  "modulos_eliminados": [
+    "Modulo Financiero",
+    "Facturacion CFDI",
+    "B2B Procurement",
+    "Logistica de Rutas",
+    "TPV Mesas & KDS",
+    "App Mesero",
+    "App Repartidor"
+  ]
+}

@@ -1,0 +1,34 @@
+# .dockerignore — FP-02.
+# Excluye del contexto de build los archivos que no deben ir en la imagen.
+# Esto acelera el build y evita filtrar secretos o archivos de dev.
+
+# Caché de Python — se regenera dentro del contenedor
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Entorno virtual local (si existe)
+.venv/
+venv/
+
+# Archivos de dev que no deben ir a producción
+.env
+.env.local
+*.log
+logs/
+
+# Tests — no necesarios en la imagen de producción
+tests/
+
+# Git
+.git/
+.gitignore
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Archivos de estado en runtime (se generan en el contenedor, no se copian)
+terminal_config.json

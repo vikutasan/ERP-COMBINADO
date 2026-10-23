@@ -1,0 +1,41 @@
+{
+  "orden": "der-izq",
+  "terminals": [
+    {
+      "id": "TERM-01",
+      "name": "Terminal 1",
+      "icon": "💰",
+      "color": "bg-yellow-200"
+    },
+    {
+      "id": "TERM-02",
+      "name": "Terminal 2",
+      "icon": "🖥️",
+      "color": "bg-green-400"
+    },
+    {
+      "id": "TERM-03",
+      "name": "Terminal 3",
+      "icon": "🖥️",
+      "color": "bg-cyan-300"
+    },
+    {
+      "id": "TERM-04",
+      "name": "Terminal 4",
+      "icon": "🖥️",
+      "color": "bg-orange-400"
+    },
+    {
+      "id": "TERM-05",
+      "name": "Terminal 5",
+      "icon": "🖥️",
+      "color": "bg-violet-400"
+    },
+    {
+      "id": "TERM-06",
+      "name": "Terminal 6",
+      "icon": "🖥️",
+      "color": "bg-pink-300"
+    }
+  ]
+}

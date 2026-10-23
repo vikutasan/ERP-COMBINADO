@@ -1,0 +1,12 @@
+{
+  "name": "@nuevo-pos/theme-engine",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Motor de temas compartido del nuevo ERP. Infraestructura, no módulo. Si Vista General se cae, esto sigue funcionando.",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./contraste": "./contraste.js"
+  }
+}

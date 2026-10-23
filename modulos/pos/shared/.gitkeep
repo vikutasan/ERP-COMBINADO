@@ -1,0 +1,2 @@
+# apps/shared — Utilidades compartidas (timezone, money).
+# F1: aquí nacerán TimezoneContext y MoneyContext (espejo del ERP, sin tocarlo).

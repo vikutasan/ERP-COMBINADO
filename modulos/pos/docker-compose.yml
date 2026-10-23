@@ -1,0 +1,78 @@
+# Docker Compose del módulo POS — ERP COMBINADO (FASE 1.8).
+#
+# Este archivo levanta SOLO el módulo POS: su PostgreSQL y su API.
+# El frontend corre en el host con Vite (puerto 5210) porque necesita HMR.
+#
+# Aislamiento (RT-09, REGLA 1):
+#   - Base de datos propia: `erp_pos` en el puerto 5440.
+#   - NO comparte base con producción (`erp_rderico`, 5433).
+#   - NO comparte base con NUEVO-ERP (`nuevo_pos`, 5432).
+#   - NO importa código de `ERP-R-DE-RICO/apps/`.
+#
+# Puertos asignados (ver PUERTOS.md):
+#   - 5440  PostgreSQL  -> erp_pos
+#   - 5211  API FastAPI -> erp-combinado-pos-api
+#   - 5210  Frontend Vite (en el host, no en este compose)
+#
+# Uso:
+#   docker compose up -d
+#   docker compose run --rm api alembic upgrade head
+#   docker compose run --rm api alembic downgrade base
+#   docker compose run --rm api alembic upgrade head
+#   docker compose run --rm api pytest -v
+#   docker compose run --rm api python scripts/seed_demo.py
+#
+#   # Verificación:
+#   curl http://localhost:5211/health
+#   curl "http://localhost:5211/catalog/products-for-sale?channel=PANADERIA"
+
+services:
+  db:
+    image: postgres:15
+    container_name: erp_combinado_pos_db
+    environment:
+      POSTGRES_USER: pos
+      POSTGRES_PASSWORD: pos
+      POSTGRES_DB: erp_pos
+    ports:
+      # 5440 en el host para no chocar con producción (5433) ni NUEVO-ERP (5432).
+      - "5440:5432"
+    volumes:
+      - erp_pos_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pos -d erp_pos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: python:3.12-slim
+    container_name: erp_combinado_pos_api
+    working_dir: /app
+    environment:
+      # Dentro de la red de Docker el puerto es el nativo de Postgres (5432).
+      DATABASE_URL: postgresql+asyncpg://pos:pos@db:5432/erp_pos
+    ports:
+      - "5211:5211"
+    volumes:
+      - ./api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    # `--reload` es obligatorio en desarrollo: el código vive en un volumen
+    # montado (./api:/app), así que editar un archivo en el host NO reinicia el
+    # proceso. Sin `--reload`, uvicorn mantiene en memoria la tabla de rutas del
+    # arranque y un endpoint nuevo responde 404 hasta reiniciar el contenedor.
+    # Ese fue el bug real de 13 h en el NUEVO-ERP; aquí queda cerrado de origen.
+    command: >
+      sh -c "pip install --quiet --no-cache-dir -r requirements.txt &&
+             uvicorn main:app --host 0.0.0.0 --port 5211 --reload"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5211/health').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  erp_pos_data:

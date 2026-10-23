@@ -1,0 +1,30 @@
+# .dockerignore del frontend del POS — FP-02.
+#
+# Excluye archivos que no necesita el build de Docker, acelerando el
+# `docker build` y reduciendo el tamaño del contexto enviado al daemon.
+
+# Dependencias (se instalan dentro del contenedor con npm ci)
+node_modules/
+
+# Build anterior (se regenera en el contenedor)
+dist/
+
+# Variables de entorno locales (nunca deben ir en la imagen)
+.env
+.env.local
+.env.*.local
+
+# Editor y sistema
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
