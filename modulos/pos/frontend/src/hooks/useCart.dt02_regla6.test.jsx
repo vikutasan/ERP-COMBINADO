@@ -41,8 +41,13 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { useCart } from './useCart.js';
 
-// Vitest corre desde `apps/pos`, así que las rutas se resuelven desde el cwd.
+// Vitest corre desde la raíz del frontend, así que las rutas se resuelven
+// desde el cwd. En NUEVO-ERP el POS vivía en `apps/pos` (dos niveles hasta la
+// raíz del repo); en el ERP COMBINADO vive en `modulos/pos/frontend`, que son
+// TRES niveles. `RAIZ_REPO` absorbe esa diferencia para que las rutas a
+// `scripts/` sigan apuntando a la raíz real del repositorio.
 const RAIZ_POS = process.cwd();
+const RAIZ_REPO = resolve(RAIZ_POS, '..', '..', '..');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Criterio 1 — el total viene del BACKEND tras añadir una línea
@@ -179,7 +184,7 @@ describe('DT-02 regla 6 — fallback local solo en modo sin servidor', () => {
 
 describe('DT-02 regla 6 — el guard E-09-FE cierra el punto ciego del frontend', () => {
   it('el guard declara la regla E-09-FE y honra el marcador DT-02-FALLBACK-LOCAL', () => {
-    const ruta = resolve(RAIZ_POS, '..', '..', 'scripts', 'guards.mjs');
+    const ruta = resolve(RAIZ_REPO, 'scripts', 'guards.mjs');
     const fuente = readFileSync(ruta, 'utf8');
 
     // El guard declara el grep E-09-FE (suma de dinero en el frontend).
