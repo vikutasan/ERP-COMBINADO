@@ -23,6 +23,10 @@ RT-02: price_modifier y precios son Numeric -> str en JSON.
 RT-03: IDs de tags y variantes son UUID.
 RT-04: El historial de precios es append-only (solo lectura aqui).
 RT-01: changed_at en ISO-8601 UTC.
+
+ADAPTACION ERP COMBINADO (FASE 2.3b):
+  `product_id` es UUID en todo el modulo, porque `products.id` es UUID en el
+  ERP COMBINADO (ADR-GP-04 / REGLA 15). En el NUEVO-ERP original era INTEGER.
 """
 
 from __future__ import annotations
@@ -49,7 +53,7 @@ router = APIRouter(prefix="/catalog", tags=["gestion-productos"])
     summary="Historial de precios de un producto (NC-GP-01)",
 )
 async def get_price_history(
-    product_id: int,
+    product_id: uuid.UUID,
     limit: int = Query(default=100, le=500),
     db: AsyncSession = Depends(get_db),
 ) -> list[dict]:
@@ -64,7 +68,7 @@ async def get_price_history(
     return [
         {
             "id":         e.id,
-            "product_id": e.product_id,
+            "product_id": str(e.product_id),
             "price":      str(e.price),   # RT-02: Decimal -> str
             "cost":       str(e.cost) if e.cost is not None else None,
             "changed_at": e.changed_at.isoformat(),  # RT-01: ISO-8601 UTC
@@ -159,7 +163,7 @@ async def delete_tag(tag_id: str, db: AsyncSession = Depends(get_db)) -> None:
     response_model=list[dict],
     summary="Tags asignados a un producto (NC-GP-05)",
 )
-async def get_product_tags(product_id: int, db: AsyncSession = Depends(get_db)) -> list[dict]:
+async def get_product_tags(product_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> list[dict]:
     """Devuelve los tags actualmente asignados al producto."""
     result = await db.execute(
         select(ProductTag)
@@ -177,7 +181,7 @@ async def get_product_tags(product_id: int, db: AsyncSession = Depends(get_db)) 
     summary="Reemplaza todos los tags de un producto (NC-GP-05)",
 )
 async def update_product_tags(
-    product_id: int,
+    product_id: uuid.UUID,
     payload: dict,
     db: AsyncSession = Depends(get_db),
 ) -> list[dict]:
@@ -224,7 +228,7 @@ async def update_product_tags(
 def _variant_to_dict(v: ProductVariant) -> dict:
     return {
         "id":             str(v.id),
-        "product_id":     v.product_id,
+        "product_id":     str(v.product_id),
         "variant_name":   v.variant_name,
         "price_modifier": str(v.price_modifier),  # RT-02: Decimal -> str
         "is_default":     v.is_default,
@@ -234,7 +238,7 @@ def _variant_to_dict(v: ProductVariant) -> dict:
 
 
 @router.get("/products/{product_id}/variants", response_model=list[dict], summary="Variantes (NC-GP-02)")
-async def get_variants(product_id: int, db: AsyncSession = Depends(get_db)) -> list[dict]:
+async def get_variants(product_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> list[dict]:
     result = await db.execute(
         select(ProductVariant)
         .where(ProductVariant.product_id == product_id)
@@ -244,7 +248,7 @@ async def get_variants(product_id: int, db: AsyncSession = Depends(get_db)) -> l
 
 
 @router.post("/products/{product_id}/variants", response_model=dict, status_code=201, summary="Crear variante (NC-GP-02)")
-async def create_variant(product_id: int, payload: dict, db: AsyncSession = Depends(get_db)) -> dict:
+async def create_variant(product_id: uuid.UUID, payload: dict, db: AsyncSession = Depends(get_db)) -> dict:
     name = (payload.get("variant_name") or "").strip()
     if not name:
         raise HTTPException(status_code=400, detail="'variant_name' es obligatorio.")
@@ -264,7 +268,7 @@ async def create_variant(product_id: int, payload: dict, db: AsyncSession = Depe
 
 
 @router.put("/products/{product_id}/variants/{variant_id}", response_model=dict, summary="Actualizar variante (NC-GP-02)")
-async def update_variant(product_id: int, variant_id: str, payload: dict, db: AsyncSession = Depends(get_db)) -> dict:
+async def update_variant(product_id: uuid.UUID, variant_id: str, payload: dict, db: AsyncSession = Depends(get_db)) -> dict:
     try:
         vid = uuid.UUID(variant_id)
     except ValueError:
@@ -283,7 +287,7 @@ async def update_variant(product_id: int, variant_id: str, payload: dict, db: As
 
 
 @router.delete("/products/{product_id}/variants/{variant_id}", status_code=204, response_model=None, summary="Eliminar variante (NC-GP-02)")
-async def delete_variant(product_id: int, variant_id: str, db: AsyncSession = Depends(get_db)) -> None:
+async def delete_variant(product_id: uuid.UUID, variant_id: str, db: AsyncSession = Depends(get_db)) -> None:
     try:
         vid = uuid.UUID(variant_id)
     except ValueError:

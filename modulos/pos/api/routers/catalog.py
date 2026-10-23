@@ -21,19 +21,19 @@ Brechas cerradas (22-Oct-2026):
   - Productos: se exponen available, unit_of_sale y variants.
 
 Nota sobre variantes (NC-GP-02):
-  product_variants.product_id es INTEGER (herencia ERP viejo).
-  products.id en el NUEVO-POS es UUID.
-  No se puede hacer un ORM relationship directo entre tipos distintos.
-  Solución: segunda query que convierte el UUID al integer via cast y construye
-  un dict {product_id: [variantes]} para inyectar en la respuesta.
+  FASE 2.3b: `product_variants.product_id` es UUID, igual que `products.id`
+  (ADR-GP-04 / REGLA 15). Se carga una sola query con todas las variantes
+  activas y se construye un dict {product_id_uuid: [variantes]} para inyectar
+  en la respuesta. Sin variantes, la lista queda vacía (compatibilidad).
 """
 
 from __future__ import annotations
 
+import uuid
 from collections import defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
@@ -96,11 +96,10 @@ async def products_for_sale(
     productos_rows = (await db.execute(prod_query)).scalars().all()
 
     # ── Variantes (NC-GP-02) ──────────────────────────────────────────────
-    # product_variants.product_id es INTEGER (ERP viejo).
-    # products.id en el POS es UUID.
-    # Cargamos TODAS las variantes activas en una sola query y construimos
-    # un índice {product_id_int: [variantes]} para inyectar en la respuesta.
-    variantes_map: dict[int, list[ProductVariant]] = defaultdict(list)
+    # FASE 2.3b: `product_variants.product_id` es UUID, igual que `products.id`
+    # (ADR-GP-04 / REGLA 15). Cargamos TODAS las variantes activas en una sola
+    # query y construimos un índice {product_id_uuid: [variantes]}.
+    variantes_map: dict[uuid.UUID, list[ProductVariant]] = defaultdict(list)
     if productos_rows:
         variantes_result = await db.execute(
             select(ProductVariant)
@@ -111,23 +110,17 @@ async def products_for_sale(
             variantes_map[v.product_id].append(v)
 
     # ── Construcción de la respuesta ──────────────────────────────────────
-    # El campo `id` de Product en el POS es UUID, pero para buscar variantes
-    # necesitamos el INTEGER. Los productos del ERP viejo tienen `id` INTEGER
-    # guardado en el campo `sku` o en el campo `id` según la migración usada.
-    # Como los dos modelos conviven en la misma DB, la búsqueda es por el
-    # INTEGER cast del UUID (que en el ERP viejo es un integer sequential).
-    # NOTA: si hay productos creados directamente en el POS (UUID puro sin
-    # equivalente integer), no tendrán variantes — lo cual es correcto porque
-    # las variantes se gestionan desde el GP que usa INTEGER ids.
-
     def _build_producto(p: Product) -> ProductoParaVenta:
-        # Intentar obtener el integer product_id para buscar variantes.
-        # Los products del ERP viejo tienen id UUID que es un UUID v4 real,
-        # pero product_variants.product_id es el INTEGER original.
-        # En la migración compartida, no hay conversión directa UUID→INT.
-        # Por ahora, `variants` queda vacío hasta que se unifique el tipo de PK.
-        # TODO: unificar product_id en product_variants a UUID (migración futura).
-        variants_list: list[VarianteParaVenta] = []
+        variants_list: list[VarianteParaVenta] = [
+            VarianteParaVenta(
+                id=v.id,
+                variant_name=v.variant_name,
+                price_modifier=v.price_modifier,
+                is_default=v.is_default,
+                sort_order=v.sort_order,
+            )
+            for v in variantes_map.get(p.id, [])
+        ]
 
         return ProductoParaVenta(
             id=p.id,

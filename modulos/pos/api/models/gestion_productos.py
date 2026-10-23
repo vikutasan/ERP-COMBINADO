@@ -6,6 +6,14 @@ NC-GP-01: ProductPriceHistory -- ledger inmutable de cambios de precio.
 RT-04: Esta tabla es APPEND-ONLY. No tiene UPDATE ni DELETE en produccion.
 RT-01: changed_at es DateTime(timezone=True) -- UTC siempre.
 RT-02: price y cost son Numeric(12,2) -- nunca Float.
+
+ADAPTACION ERP COMBINADO (FASE 2.3b):
+  En el NUEVO-ERP original `products.id` era INTEGER, por lo que estas tres
+  tablas declaraban `product_id` como Integer. En el ERP COMBINADO el catalogo
+  ya usa UUID como PK (`models/catalog.py`, ADR-GP-04 / REGLA 15), asi que
+  `product_id` DEBE ser UUID. Si se deja Integer, PostgreSQL rechaza la FK con
+  `DatatypeMismatchError: Key columns "product_id" and "id" are of incompatible
+  types: integer and uuid` y el endpoint de catalogo devuelve 500.
 """
 
 from __future__ import annotations
@@ -34,8 +42,9 @@ class ProductPriceHistory(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     # FK al producto. Si el producto se borra, se borra su historial (CASCADE).
-    product_id: Mapped[int] = mapped_column(
-        Integer,
+    # ADAPTACION ERP COMBINADO: UUID, no Integer (products.id es UUID).
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
         ForeignKey("products.id", ondelete="CASCADE", name="fk_price_history_product"),
         nullable=False,
         index=True,
@@ -79,7 +88,8 @@ product_tag_map = Table(
     "product_tag_map",
     Base.metadata,
     Column(
-        "product_id", Integer,
+        # ADAPTACION ERP COMBINADO: UUID, no Integer (products.id es UUID).
+        "product_id", PG_UUID(as_uuid=True),
         ForeignKey("products.id", ondelete="CASCADE", name="fk_tag_map_product"),
         primary_key=True,
     ),
@@ -135,8 +145,9 @@ class ProductVariant(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    product_id: Mapped[int] = mapped_column(
-        Integer,
+    # ADAPTACION ERP COMBINADO: UUID, no Integer (products.id es UUID).
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
         ForeignKey("products.id", ondelete="CASCADE", name="fk_variants_product"),
         nullable=False,
         index=True,
