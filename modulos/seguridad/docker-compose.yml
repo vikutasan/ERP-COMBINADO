@@ -1,0 +1,67 @@
+# Seguridad y Acceso — FASE 3.1 del ERP COMBINADO.
+#
+# Aislamiento (RT-09, REGLA 1):
+#   * Base de datos propia: erp_seguridad en el puerto 5441.
+#     No comparte nada con producción (5433), con NUEVO-ERP (5432) ni con el
+#     POS del ERP COMBINADO (5440).
+#   * API propia en el puerto 5229. El frontend vive en 5228.
+#   * Este módulo no importa código de ERP-R-DE-RICO/apps/ ni de otro módulo.
+#
+# Uso:
+#   docker compose up -d
+#   docker compose run --rm api alembic upgrade head
+#   docker compose run --rm api pytest -v
+#   curl http://localhost:5229/health
+#
+# Nota: `docker compose run` NO aplica el `command:` del servicio, así que las
+# dependencias no están instaladas en el contenedor efímero. Por eso los
+# comandos de alembic/pytest se lanzan con `pip install` en línea.
+
+services:
+  db:
+    image: postgres:15
+    container_name: erp_combinado_seguridad_db
+    environment:
+      POSTGRES_USER: seguridad
+      POSTGRES_PASSWORD: seguridad
+      POSTGRES_DB: erp_seguridad
+    ports:
+      - "5441:5432"
+    volumes:
+      - erp_seguridad_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seguridad -d erp_seguridad"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: python:3.12-slim
+    container_name: erp_combinado_seguridad_api
+    working_dir: /app
+    environment:
+      DATABASE_URL: postgresql+asyncpg://seguridad:seguridad@db:5432/erp_seguridad
+    ports:
+      - "5229:5229"
+    volumes:
+      - ./api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    # `--reload` es obligatorio: el código vive en un volumen montado y, sin
+    # recarga, un endpoint nuevo responde 404 hasta reiniciar el contenedor.
+    # Ese fue el bug real que costó 13 horas en NUEVO-ERP.
+    command: >
+      sh -c "pip install --quiet --no-cache-dir -r requirements.txt &&
+             uvicorn main:app --host 0.0.0.0 --port 5229 --reload"
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5229/health').status==200 else 1)\""
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  erp_seguridad_data:

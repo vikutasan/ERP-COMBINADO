@@ -1,0 +1,25 @@
+{
+  "name": "@erp-combinado/seguridad-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Seguridad y Acceso — frontend del ERP COMBINADO (puerto 5228).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "ci": "npm run test && npm run build"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.5",
+    "jsdom": "^24.1.1"
+  }
+}

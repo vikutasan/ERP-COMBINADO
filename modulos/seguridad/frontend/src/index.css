@@ -1,0 +1,324 @@
+/* Seguridad y Acceso — estilos del módulo (FASE 3.1).
+ *
+ * RT-11: el tema estándar es inalterable en el Slot 1 (fondo, tipografía,
+ * estructura). Los Slots 2 y 3 permiten personalizar acentos por oficio; aquí
+ * se declaran como variables CSS para que el hub pueda inyectarlos sin tocar
+ * este archivo.
+ *
+ * RT-14: diseño responsivo total en tres puntos de corte:
+ *   - móvil      : < 640px
+ *   - tableta    : 640px – 1023px
+ *   - escritorio : >= 1024px
+ */
+
+:root {
+  /* Slot 1 — inalterable */
+  --fondo: #12100e;
+  --fondo-panel: #1c1917;
+  --fondo-panel-alto: #262220;
+  --borde: #3a3431;
+  --texto: #f5f1ec;
+  --texto-tenue: #a8a09a;
+  --tipografia: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --radio: 12px;
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  /* Slot 2 — acento del oficio (personalizable) */
+  --acento: #c98a3f;
+  --acento-tenue: rgba(201, 138, 63, 0.16);
+
+  /* Slot 3 — semánticos (personalizables) */
+  --exito: #4caf7d;
+  --error: #d9534f;
+  --aviso: #d9a441;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--tipografia);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Estructura ─────────────────────────────────────────────────────────── */
+
+.modulo {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--fondo-panel);
+  border-bottom: 1px solid var(--borde);
+  flex-wrap: wrap;
+}
+
+.encabezado__titulo {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.encabezado__subtitulo {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--texto-tenue);
+}
+
+.contenido {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  padding: 24px;
+  align-items: start;
+}
+
+/* ── Tarjetas ───────────────────────────────────────────────────────────── */
+
+.tarjeta {
+  background: var(--fondo-panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 20px;
+  box-shadow: var(--sombra);
+}
+
+.tarjeta__titulo {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.tarjeta__ayuda {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  color: var(--texto-tenue);
+}
+
+/* ── Formularios ────────────────────────────────────────────────────────── */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.campo__etiqueta {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.campo__entrada {
+  width: 100%;
+  padding: 11px 13px;
+  background: var(--fondo-panel-alto);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.campo__entrada:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px var(--acento-tenue);
+}
+
+.campo__entrada--pin {
+  font-size: 1.6rem;
+  letter-spacing: 0.5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  background: var(--acento);
+  color: #1a1512;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.boton:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.boton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.boton--ancho {
+  width: 100%;
+}
+
+/* ── Mensajes ───────────────────────────────────────────────────────────── */
+
+.mensaje {
+  margin-top: 14px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  border: 1px solid transparent;
+}
+
+.mensaje--error {
+  background: rgba(217, 83, 79, 0.12);
+  border-color: rgba(217, 83, 79, 0.4);
+  color: #f0a9a7;
+}
+
+.mensaje--exito {
+  background: rgba(76, 175, 125, 0.12);
+  border-color: rgba(76, 175, 125, 0.4);
+  color: #9ad9b9;
+}
+
+/* ── Identidad ──────────────────────────────────────────────────────────── */
+
+.identidad {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.identidad__nombre {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.identidad__perfil {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--acento-tenue);
+  color: var(--acento);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.permisos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.permisos__item {
+  padding: 5px 11px;
+  background: var(--fondo-panel-alto);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  color: var(--texto-tenue);
+}
+
+.vacio {
+  color: var(--texto-tenue);
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+/* ── Indicador de salud ─────────────────────────────────────────────────── */
+
+.salud {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  color: var(--texto-tenue);
+}
+
+.salud__punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--texto-tenue);
+}
+
+.salud__punto--ok {
+  background: var(--exito);
+  box-shadow: 0 0 0 3px rgba(76, 175, 125, 0.18);
+}
+
+.salud__punto--error {
+  background: var(--error);
+  box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.18);
+}
+
+/* ── RT-14: tableta ─────────────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .contenido {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px;
+    gap: 16px;
+  }
+}
+
+/* ── RT-14: móvil ───────────────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  body {
+    font-size: 14px;
+  }
+
+  .encabezado {
+    padding: 12px 16px;
+  }
+
+  .contenido {
+    padding: 14px;
+  }
+
+  .tarjeta {
+    padding: 16px;
+  }
+
+  .campo__entrada--pin {
+    font-size: 1.35rem;
+    letter-spacing: 0.35em;
+  }
+}

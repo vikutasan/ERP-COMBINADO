@@ -1,0 +1,25 @@
+# Dependencias del backend de Seguridad y Acceso — FASE 3.1 del ERP COMBINADO.
+# Stack obligatorio (RT-09): Python + FastAPI + SQLAlchemy async + Alembic +
+# PostgreSQL 15 + pytest. Mismo stack que el POS para que el operador tenga una
+# sola forma de arrancar cualquier modulo.
+
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy[asyncio]==2.0.35
+asyncpg==0.29.0
+alembic==1.13.3
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# O-21: el contrato 8 exige rate-limit obligatorio en el endpoint del PIN.
+# `slowapi` es el envoltorio de `limits` para FastAPI. Sin el, el contrato 8
+# no puede cumplir su garantia y el POS quedaria expuesto a fuerza bruta.
+slowapi==0.1.9
+
+# FA-02: ZoneInfo con DST real (America/Mexico_City).
+tzdata>=2024.1
+
+# Pruebas
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2

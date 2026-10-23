@@ -100,8 +100,11 @@ from importacion_comun import (
     uuid_producto,
 )
 
-# La base destino de los colaboradores NO es `erp_pos` sino `erp_seguridad`.
+# La base destino de los colaboradores NO es `erp_pos` sino `erp_seguridad`, y
+# vive en el contenedor del módulo Seguridad (5441), no en el del POS (5440).
+# RT-09: cada módulo tiene su propia base en su propio contenedor.
 DEST_SEGURIDAD_DB = os.environ.get("DEST_SEGURIDAD_DB", "erp_seguridad")
+DEST_SEGURIDAD_PORT = int(os.environ.get("DEST_SEGURIDAD_PORT", "5441"))
 
 
 # ---------------------------------------------------------------------------
@@ -160,13 +163,13 @@ class Verificador:
 
 
 def conectar_seguridad() -> "psycopg.Connection":
-    """Abre una conexión de LECTURA a la base `erp_seguridad`."""
-    from importacion_comun import DEST_HOST, DEST_PASSWORD, DEST_PORT, DEST_USER
+    """Abre una conexión de LECTURA a la base `erp_seguridad` del módulo."""
+    from importacion_comun import DEST_HOST, DEST_PASSWORD, DEST_USER
 
     try:
         return psycopg.connect(
             host=DEST_HOST,
-            port=DEST_PORT,
+            port=DEST_SEGURIDAD_PORT,
             dbname=DEST_SEGURIDAD_DB,
             user=DEST_USER,
             password=DEST_PASSWORD,
@@ -175,9 +178,10 @@ def conectar_seguridad() -> "psycopg.Connection":
     except psycopg.OperationalError as exc:
         sys.exit(
             f"No se pudo conectar a {DEST_SEGURIDAD_DB} "
-            f"({DEST_HOST}:{DEST_PORT} como {DEST_USER}).\n"
+            f"({DEST_HOST}:{DEST_SEGURIDAD_PORT} como {DEST_USER}).\n"
             f"  Detalle: {exc}\n"
-            "  ¿Está arriba el contenedor de la base de seguridad?"
+            "  ¿Está arriba el contenedor de la base de seguridad "
+            "(modulos/seguridad/docker-compose.yml, puerto 5441)?"
         )
 
 

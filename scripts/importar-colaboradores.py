@@ -90,25 +90,30 @@ from importacion_comun import (
     uuid_perfil,
 )
 
-# La base destino de este importador NO es `erp_pos` sino `erp_seguridad`.
-# `conectar_destino()` abre `erp_pos` por defecto, así que aquí se abre una
-# conexión propia apuntando a la base correcta, reutilizando las mismas
-# credenciales y variables de entorno.
+# La base destino de este importador NO es `erp_pos` sino `erp_seguridad`, y
+# tampoco vive en el contenedor del POS. RT-09 exige que cada módulo tenga su
+# propia base en su propio contenedor: Seguridad usa el puerto 5441, mientras
+# que `importacion_comun.DEST_PORT` (5440) apunta al contenedor del POS.
+#
+# Reutilizar `DEST_PORT` escribía los colaboradores dentro del contenedor del
+# POS, violando RT-09 y dejando la base real de Seguridad vacía. Por eso aquí
+# se usa una variable propia, `DEST_SEGURIDAD_PORT`, con 5441 por defecto.
 import os
 
 import psycopg
 
 DEST_SEGURIDAD_DB = os.environ.get("DEST_SEGURIDAD_DB", "erp_seguridad")
+DEST_SEGURIDAD_PORT = int(os.environ.get("DEST_SEGURIDAD_PORT", "5441"))
 
 
 def conectar_seguridad() -> "psycopg.Connection":
-    """Abre una conexión de escritura a la base `erp_seguridad`."""
-    from importacion_comun import DEST_HOST, DEST_PASSWORD, DEST_PORT, DEST_USER
+    """Abre una conexión de escritura a la base `erp_seguridad` del módulo."""
+    from importacion_comun import DEST_HOST, DEST_PASSWORD, DEST_USER
 
     try:
         return psycopg.connect(
             host=DEST_HOST,
-            port=DEST_PORT,
+            port=DEST_SEGURIDAD_PORT,
             dbname=DEST_SEGURIDAD_DB,
             user=DEST_USER,
             password=DEST_PASSWORD,
@@ -117,9 +122,10 @@ def conectar_seguridad() -> "psycopg.Connection":
     except psycopg.OperationalError as exc:
         sys.exit(
             f"No se pudo conectar a {DEST_SEGURIDAD_DB} "
-            f"({DEST_HOST}:{DEST_PORT} como {DEST_USER}).\n"
+            f"({DEST_HOST}:{DEST_SEGURIDAD_PORT} como {DEST_USER}).\n"
             f"  Detalle: {exc}\n"
-            "  ¿Creaste la base y aplicaste migracion/02_esquema_seguridad.sql?"
+            "  ¿Levantaste modulos/seguridad/docker-compose.yml y aplicaste "
+            "`alembic upgrade head`?"
         )
 
 
