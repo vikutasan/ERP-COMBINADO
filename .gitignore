@@ -51,6 +51,15 @@ env/
 backups/
 database_backups/
 
+# ─── Mapa de identificadores (CONTIENE DATOS PERSONALES) ─────────────────────
+# `migracion/mapa_ids.csv` empareja el PIN real de cada colaborador con su
+# nombre (`clave_natural` = "1111 - VICTOR"). Es material sensible: el PIN es
+# la credencial de acceso al POS (O-21) y el nombre es dato personal.
+# NUNCA se versiona. Se regenera ejecutando los importadores de la FASE 2.
+# La plantilla `mapa_ids.example.csv` sí se versiona y documenta el formato.
+migracion/mapa_ids.csv
+!migracion/mapa_ids.example.csv
+
 # ─── Logs ────────────────────────────────────────────────────────────────────
 *.log
 logs/
