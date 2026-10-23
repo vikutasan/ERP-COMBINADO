@@ -44,6 +44,33 @@ ERP-COMBINADO/
         └── docker-compose.yml
 ```
 
+## Respaldo en GitHub
+
+Este repositorio se respalda en **`https://github.com/vikutasan/ERP-COMBINADO`**
+(rama `master`). El remoto se llama `origin`.
+
+```cmd
+git push origin master
+```
+
+### Qué NO se versiona (y por qué)
+
+| Archivo | Motivo |
+|:---|:---|
+| `.env` | Credenciales reales de las bases de datos |
+| `migracion/mapa_ids.csv` | Empareja el **PIN real** de cada colaborador con su nombre (`clave_natural` = `"1111 - VICTOR"`). El PIN es la credencial de acceso al POS (O-21) y el nombre es dato personal |
+| `*.sql`, `*.dump`, `*.backup` | Volcados de base de datos |
+| `node_modules/`, `dist/`, `__pycache__/`, `.pytest_cache/` | Artefactos regenerables |
+
+El formato del mapa de identificadores está documentado en
+[`migracion/mapa_ids.example.csv`](migracion/mapa_ids.example.csv), que sí se
+versiona con filas ficticias. El archivo real se regenera ejecutando los
+importadores de la FASE 2.
+
+> **Antes de añadir un archivo nuevo, pregúntate si contiene un PIN, un nombre de
+> colaborador, una contraseña o un volcado de datos.** Si la respuesta es sí, va
+> al `.gitignore`, no al repositorio.
+
 ## Rangos de puertos
 
 ```
